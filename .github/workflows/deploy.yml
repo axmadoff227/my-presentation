@@ -1,0 +1,35 @@
+name: Deploy to axmadoff.uz
+
+on:
+  push:
+    branches:
+      - main
+      - claude/confident-goldberg-rw63ao
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "Trastbank Islamic Banking - Standalone.html"
+          target: /www/axmadoff.uz/pres1/
+          strip_components: 0
+
+      - name: Rename to index.html on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            mv "/www/axmadoff.uz/pres1/Trastbank Islamic Banking - Standalone.html" \
+               /www/axmadoff.uz/pres1/index.html 2>/dev/null || true
+            echo "Deployed at $(date)"
